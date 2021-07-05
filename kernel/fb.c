@@ -1,5 +1,5 @@
 #include "io.h"
-#include "framebuffer.h"
+#include "fb.h"
 
 /* Inicio do framebuffer */
 #define FB_MEMORY 0x000B8000

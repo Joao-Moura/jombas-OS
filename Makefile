@@ -1,28 +1,23 @@
-OBJECTS = loader.o kmain.o io.o framebuffer.o
-CC = gcc
-CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-	 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
-LDFLAGS = -T link.ld -melf_i386
-AS = nasm
-ASFLAGS = -f elf
+all: iso
 
-all: kernel.elf
-
-kernel.elf: $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
-
-os.iso: kernel.elf
-	cp kernel.elf iso/boot/kernel.elf
+iso: build_kernel
+	@echo 'Creating iso ...'
+	cp kernel/kernel.elf iso/boot/kernel.elf
 	grub-mkrescue -o os.iso iso
+	@echo ''
 
-run: os.iso
+run: iso
+	@echo 'Running iso in Bochs'
 	bochs -f bochsrc.txt -q
+	@echo ''
 
-%.o: %.c
-	$(CC) $(CFLAGS)  $< -o $@
-
-%.o: %.s
-	$(AS) $(ASFLAGS) $< -o $@
+build_kernel:
+	@echo 'Building kernel ...'
+	@make --no-print-directory -C kernel
+	@echo ''
 
 clean:
-	rm -rf *.o kernel.elf os.iso bochslog.txt
+	@echo 'Cleaning kernel ...'
+	@make --no-print-directory -C kernel clean 
+	@echo ''
+	rm -rf os.iso bochslog.txt

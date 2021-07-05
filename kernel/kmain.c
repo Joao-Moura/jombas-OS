@@ -1,4 +1,4 @@
-#include "framebuffer.h"
+#include "fb.h"
 
 void kmain () {
     char string[2000] = "Testando Testando kkkk";
