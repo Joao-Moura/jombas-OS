@@ -1,16 +1,16 @@
 #include "io.h"
+#include "serial.h"
 
 /* Portas I/O */
 /* Todas as portas sao calculadas relativamente de acordo com a porta de data.
  * E todas as portas seriais (COM1, COM2, COM3 e COM4), possuem
  * a mesma ordem, so que comecam em lugares diferentes
  */
-#define SERIAL_COM1_BASE		0x3F8
-#define SERIAL_DATA_PORT(base)		(base)
-#define SERIAL_FIFO_COMMAND_PORT(base)	(base + 2)
-#define SERIAL_LINE_COMMAND_PORT(base)	(base + 3)
-#define SERIAL_MODEM_COMMAND_PORT(base)	(base + 4)
-#define SERIAL_LINE_STATUS_PORT(base)	(base + 5)
+#define SERIAL_DATA_PORT(base)			(base)
+#define SERIAL_FIFO_COMMAND_PORT(base)		(base + 2)
+#define SERIAL_LINE_COMMAND_PORT(base)		(base + 3)
+#define SERIAL_MODEM_COMMAND_PORT(base)		(base + 4)
+#define SERIAL_LINE_STATUS_PORT(base)		(base + 5)
 
 /* Comandos das portas I/O */
 /* SERIAL_LINE_ENABLE_DLAB:
@@ -31,7 +31,7 @@
 void serial_configure_baud_rate (unsigned short com, unsigned short divisor) {
     outb(SERIAL_DATA_PORT(com), SERIAL_LINE_ENABLE_DLAB);
     outb(SERIAL_DATA_PORT(com), divisor & 0x00FF);
-    outb(SERIAL_DATA_PORT(com), (divisor >> 8) * 0x00FF);
+    outb(SERIAL_DATA_PORT(com + 1), (divisor & 0xFF00) >> 8);
 }
 
 /* serial_configure_line:
@@ -47,7 +47,7 @@ void serial_configure_baud_rate (unsigned short com, unsigned short divisor) {
  * bc   | break control, 0 = disabled, 1 = enabled
  * dlab | dlab, 0 = disabled, 1 = enabled
  *
- * @param com	Porta COM para configurar [16 bits]
+ * @param com Porta COM para configurar [16 bits]
  */
 void serial_configure_line (unsigned short com) {
     /* 0x03 [@osdev:serial]:
@@ -72,7 +72,7 @@ void serial_configure_line (unsigned short com) {
  * bs	| tamanho do buffer (16 ou 64 bytes)
  * lvl	| quantos bytes sao armazenados no buffer
  *
- * @param com	Porta COM para configurar [16 bits]
+ * @param com Porta COM para configurar [16 bits]
  */
 void serial_configure_buffer (unsigned short com) {
    /* 0xC7 ou 0x11000111:
@@ -98,7 +98,7 @@ void serial_configure_buffer (unsigned short com) {
  * r	| reservado
  * r	| reservado
  *
- * @param com	Porta COM para configurar [16 bits]
+ * @param com Porta COM para configurar [16 bits]
  */
 void serial_configure_modem (unsigned short com) {
     /* 0x03:
@@ -111,11 +111,36 @@ void serial_configure_modem (unsigned short com) {
 /* serial_init:
  * Configuracao inicial das portas seriais
  *
- * @param com	Porta COM para configurar [16 bits]
+ * @param com Porta COM para configurar [16 bits]
  */
 void serial_init (unsigned short com) {
     serial_configure_baud_rate(com, BAUD_RATE_DIVISOR);
     serial_configure_line(com);
     serial_configure_buffer(com);
     serial_configure_modem(com);
+}
+
+/* is_transmit_fifo_empty:
+ * Checa se a fila de transmissao esta vazia para a porta COM
+ *
+ * @param com A porta COM [16 bits]
+ * @return    0 a fila de transmissao nao esta vazia
+ * 	      1 a fila de transmissao esta vazia
+ */
+static int is_transmit_fifo_empty (unsigned short com) {
+    /* Bit 5 representa se o buffer de transmissao esta vazio
+     * 0x20 = 0010 0000
+     */
+    return inb(SERIAL_LINE_STATUS_PORT(com)) & 0x20;
+}
+
+/* serial_write:
+ * Escreve na saida da porta COM
+ *
+ * @param com  A porta COM [16 bits]
+ * @param data Caracter para ser escrito [8 bits]
+ */
+void serial_write (unsigned short com, unsigned char data) {
+    while (!is_transmit_fifo_empty(com)) ;
+    outb(SERIAL_DATA_PORT(com), data);
 }

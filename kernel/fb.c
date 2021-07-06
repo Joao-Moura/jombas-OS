@@ -50,13 +50,13 @@ void fb_move_cursor (unsigned short pos) {
     outb(FB_DATA_PORT, pos);
 }
 
-/* write:
+/* fb_write:
  * Dado uma string escreve na tela
  *
  * @param buf String para ser escrita [8 bits]
  * @param len Tamanho da string [32 bits]
  */
-void write (char *buf, unsigned int len) {
+void fb_write (char *buf, unsigned int len) {
     unsigned short loc, row = 0;
     for (unsigned int i = 0; i < len; i++) {
 	if (i > FB_NUM_COLS)

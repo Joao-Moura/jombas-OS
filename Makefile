@@ -20,4 +20,4 @@ clean:
 	@echo 'Cleaning kernel ...'
 	@make --no-print-directory -C kernel clean 
 	@echo ''
-	rm -rf os.iso bochslog.txt
+	rm -rf os.iso bochslog.txt com1.out

@@ -6,7 +6,7 @@ extern kmain					; arquivo C externo
 MAGIC_NUMBER 	  equ 0x1BADB002		; número mágico para multiboot definido pelo GRUB
 FLAGS		  equ 0x0			; multiboot flags
 CHECKSUM	  equ -MAGIC_NUMBER		; MAGIC_NUMBER + FLAGS + CHECKSUM = 0
-KERNEL_STACK_SIZE equ 4096			; Tamanho da stack em bytes
+KERNEL_STACK_SIZE equ 8192			; Tamanho da stack em bytes
 
 section .bss					; secção de data que não foi inicializada
 align 4
