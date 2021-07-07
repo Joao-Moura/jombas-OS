@@ -2,11 +2,12 @@
 #include "serial.h"
 
 void kmain () {
-    char data[20] = "teste teste";
+    char data[200] = "teste teste\tkkkk\ncarambolas.";
 
-    fb_write(data, 11);
+    fb_write(data);
 
     serial_init(COM1);
-    for (int i = 0; i < 11; i++)
-	serial_write(COM1, data[i]);
+    int i = 0;
+    while (data[i] != '\0')
+	serial_write(COM1, data[i++]);
 }

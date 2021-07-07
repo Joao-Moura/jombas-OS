@@ -20,7 +20,7 @@ align 4						; alinhamento de 4 bytes, headers padrão do multiboot!
     dd CHECKSUM
 
 loader:						; label definida como entrypoint
-    ; cli						; sem interrupções, para evitar que CPU saia do estado de halt
+    cli						; sem interrupções, para evitar que CPU saia do estado de halt
     mov esp, kernel_stack + KERNEL_STACK_SIZE	; aponta o stack pointer para o final da stack (de cima para baixo)
     call kmain
-    ; hlt						; CPU entra em estado de halt
+    hlt						; CPU entra em estado de halt
