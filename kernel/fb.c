@@ -115,3 +115,14 @@ void fb_write (char *buf) {
     while (*buf != '\0')
 	fb_write_char (*buf++);
 }
+
+/* fb_clear:
+ * Limpa (char: ' ') todo o framebuffer e move o cursor
+ * para o inicio do framebuffer
+ */
+void fb_clear () {
+    for (int i = 0; i < FB_NUM_COLS * FB_NUM_ROWS; i++)
+	fb_write_cell(i*2, ' ', 15, 0);
+    cursor_pos = 0;
+    fb_set_cursor(cursor_pos);
+}

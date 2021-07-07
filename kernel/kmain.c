@@ -10,4 +10,6 @@ void kmain () {
     int i = 0;
     while (data[i] != '\0')
 	serial_write(COM1, data[i++]);
+
+    fb_clear();
 }
